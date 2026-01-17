@@ -66,7 +66,7 @@ Kognit adapts its voice and depth to your needs. Check out these examples:
 ### Prerequisites
 - **Python 3.10+**
 - **System Libraries:** Required for PDF generation (`WeasyPrint` and `pdf2image`).
-  - **Linux (Debian/Ubuntu):** `sudo apt-get install python3-pip python3-cffi python3-brotli libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-0b libpango-1.0-0 libpangoft2-1.0-0 poppler-utils`
+  - **Linux (Debian/Ubuntu):** `sudo apt-get install python3-pip python3-cffi python3-brotli libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libpangocairo-1.0-0 poppler-utils`
   - **macOS:** `brew install weasyprint poppler`
 
 ### Setup
