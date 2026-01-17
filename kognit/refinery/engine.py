@@ -43,13 +43,7 @@ CONNECTIONS_INSTRUCTIONS = """
 3. **Output:** MUST populate the `ecosystem_report` field with a detailed analysis of their place in the software world.
 """
 
-# Default Agent (will likely be overridden or prompt swapped per run, 
-# but PydanticAI agents are often static. We can pass instructions in the user message or dynamic system prompt)
-
-identity_agent = Agent(
-    'google-gla:gemini-flash-latest',
-    output_type=DeveloperIdentity,
-)
+# (Agent will be instantiated dynamically in generate_identity_from_context)
 
 from kognit.refinery.validator import refine_identity
 
