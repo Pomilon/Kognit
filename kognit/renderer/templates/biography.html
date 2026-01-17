@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ manifest.identity.name }} - Kognit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 20mm 20mm 20mm; /* Standard margin for pages 2+ */
+        }
+
+        @page :first {
+            margin-left: 95mm; /* Increased from 85mm to create a gap */
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        :root {
+            --primary: #0f172a;     /* Slate 900 */
+            --secondary: #334155;   /* Slate 700 */
+            --accent: #2563eb;      /* Blue 600 */
+            --bg-sidebar: #f8fafc;  /* Slate 50 */
+            --text-main: #1e293b;   /* Slate 800 */
+            --text-muted: #64748b;  /* Slate 500 */
+            --border: #e2e8f0;      /* Slate 200 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+
+        /* --- Sidebar (Left Column) --- */
+        .sidebar {
+            position: absolute;
+            top: 0; 
+            left: -95mm; 
+            width: 80mm; 
+            height: 100%; 
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            background: var(--border);
+        }
+
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        /* ... existing styles ... */
+        .meta-group h3 {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .meta-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .meta-list li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .contact-links a {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* --- Main Content (Right Column) --- */
+        .main-content {
+            width: 100%; 
+            padding-top: 40px; 
+            box-sizing: border-box;
+            display: block;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            line-height: 1.1;
+        }
+
+        .headline {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            page-break-after: avoid;
+        }
+        
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .prose {
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--secondary);
+            orphans: 3;
+            widows: 3;
+            text-align: justify;
+        }
+
+        /* Markdown Content Styling */
+        .prose h1, .prose h2, .prose h3 { color: var(--primary); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .prose h1 { font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        .prose h2 { font-size: 1.2rem; }
+        .prose h3 { font-size: 1.1rem; }
+        .prose p { margin-bottom: 1em; }
+        .prose strong { color: var(--primary); font-weight: 700; }
+        .prose ul, .prose ol { padding-left: 20px; margin-bottom: 1em; }
+        .prose li { margin-bottom: 0.5em; }
+        .prose code { 
+            font-family: 'JetBrains Mono', monospace; 
+            background: #f1f5f9; 
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            font-size: 0.85em;
+            color: var(--accent);
+        }
+        .prose pre {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            font-size: 0.85em;
+            margin-bottom: 1.5em;
+        }
+        .prose pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--secondary);
+        }
+        
+        /* Project Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 20px;
+            /* REMOVED page-break-inside: avoid; to allow grid to flow across pages */
+        }
+
+        .project-card {
+            border-left: 3px solid var(--accent);
+            padding-left: 15px;
+            margin-bottom: 0; 
+            background: #fff;
+            break-inside: avoid; 
+        }
+
+        .project-card h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .project-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .project-desc {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .project-impact {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: #f0f9ff;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .complexity-badge {
+            background: #fef3c7;
+            color: #d97706;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div>
+            {% if manifest.identity.avatar_url %}
+            <img src="{{ manifest.identity.avatar_url }}" class="avatar" alt="Avatar">
+            {% else %}
+            <div class="avatar-placeholder">
+                {{ manifest.identity.name[:1] }}
+            </div>
+            {% endif %}
+            
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                Kognit Validated
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Technical DNA</h3>
+            <div class="tag-cloud">
+                {% for lang in manifest.identity.technical_dna.languages %}
+                <span class="tag">{{ lang }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Frameworks</h3>
+            <div class="tag-cloud">
+                {% for fw in manifest.identity.technical_dna.frameworks %}
+                <span class="tag">{{ fw }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Focus</h3>
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--primary);">
+                {{ manifest.identity.technical_dna.specialization }}
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Inferred Persona</h3>
+             <div style="font-size: 0.85rem; line-height: 1.4; color: var(--secondary);">
+                {{ manifest.identity.role_inference }}
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Sources</h3>
+            <div class="contact-links">
+                {% for link in manifest.identity.external_links %}
+                <a href="{{ link }}">{{ link }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>{{ manifest.identity.name }}</h1>
+            <div class="headline">{{ manifest.identity.headline }}</div>
+        </header>
+
+        <section>
+            <div class="section-title">Executive Summary</div>
+            <div class="prose">
+                {{ manifest.identity.summary | safe }}
+            </div>
+        </section>
+
+        <section>
+            <div class="section-title">Key Projects & Impact</div>
+            <div class="projects-grid">
+                {% for project in manifest.identity.project_highlights %}
+                <div class="project-card">
+                    <h4>{{ project.name }}</h4>
+                    <div class="project-meta">
+                        {{ project.role }} • {{ project.technologies | join(', ') }}
+                    </div>
+                    <div class="project-desc">
+                        {{ project.description }}
+                    </div>
+                    <div class="project-impact">
+                        {{ project.impact }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if manifest.identity.technical_depth_report %}
+        <section>
+            <div class="section-title">Technical Deep Dive</div>
+            <div class="prose">
+                {{ manifest.identity.technical_depth_report | safe }}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if manifest.identity.ecosystem_report %}
+        <section>
+            <div class="section-title">Ecosystem & Connections</div>
+            <div class="prose">
+                {{ manifest.identity.ecosystem_report | safe }}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if manifest.identity.repository_analyses %}
+        <section>
+            <div class="section-title">Full-Dive Repository Audit</div>
+            {% for analysis in manifest.identity.repository_analyses %}
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>{{ analysis.name }} <span class="complexity-badge">Complexity: {{ analysis.complexity_score }}/10</span></h4>
+                <div class="project-meta">
+                    Stack: {{ analysis.key_technologies | join(', ') }}
+                </div>
+                <div class="prose">
+                    {{ analysis.technical_deconstruction }}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+    </main>
+</body>
+</html>

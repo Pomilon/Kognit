@@ -1,0 +1,38 @@
+{
+  "data": {
+    "user": {
+      "name": "Jane Doe",
+      "login": "janedoe",
+      "bio": "Open source enthusiast and Rustacean. Building high-performance CLI tools.",
+      "websiteUrl": "https://janedoe.dev",
+      "repositories": {
+        "nodes": [
+          {
+            "name": "fast-grep-rs",
+            "description": "A blazing fast grep alternative written in Rust. Reduced search time by 50% compared to ripgrep for specific patterns.",
+            "primaryLanguage": { "name": "Rust" },
+            "languages": { "nodes": [{ "name": "Rust" }, { "name": "C" }] },
+            "stargazerCount": 1200,
+            "isFork": false,
+            "repositoryTopics": { "nodes": [{ "topic": { "name": "cli" } }, { "topic": { "name": "performance" } }] }
+          },
+          {
+            "name": "distributed-task-queue",
+            "description": "Scalable task queue in Go using Redis. Handles 10k requests per second.",
+            "primaryLanguage": { "name": "Go" },
+            "languages": { "nodes": [{ "name": "Go" }, { "name": "Lua" }] },
+            "stargazerCount": 450,
+            "isFork": false,
+            "repositoryTopics": { "nodes": [{ "topic": { "name": "distributed-systems" } }, { "topic": { "name": "redis" } }] }
+          }
+        ]
+      },
+      "starredRepositories": {
+        "nodes": [
+          { "nameWithOwner": "rust-lang/rust", "description": "The Rust programming language" },
+          { "nameWithOwner": "tokio-rs/tokio", "description": "A runtime for writing reliable, asynchronous, and mixed-network applications with the Rust programming language." }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+name: Kognit CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-0b libpango-1.0-0 libpangoft2-1.0-0 poppler-utils
+        
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+        
+    - name: Run Tests
+      run: |
+        pytest tests/

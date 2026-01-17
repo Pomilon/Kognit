@@ -1,0 +1,13 @@
+pydantic-ai
+litellm
+pydantic>=2.0
+python-dotenv
+httpx
+beautifulsoup4
+markdownify
+weasyprint
+pdf2image
+duckduckgo-search
+matplotlib
+markdown
+pytest

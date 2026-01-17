@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pomilon - Kognit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 20mm 20mm 20mm; /* Standard margin for pages 2+ */
+        }
+
+        @page :first {
+            margin-left: 95mm; /* Increased from 85mm to create a gap */
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        :root {
+            --primary: #0f172a;     /* Slate 900 */
+            --secondary: #334155;   /* Slate 700 */
+            --accent: #2563eb;      /* Blue 600 */
+            --bg-sidebar: #f8fafc;  /* Slate 50 */
+            --text-main: #1e293b;   /* Slate 800 */
+            --text-muted: #64748b;  /* Slate 500 */
+            --border: #e2e8f0;      /* Slate 200 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+
+        /* --- Sidebar (Left Column) --- */
+        .sidebar {
+            position: absolute;
+            top: 0; 
+            left: -95mm; 
+            width: 80mm; 
+            height: 100%; 
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            background: var(--border);
+        }
+
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        /* ... existing styles ... */
+        .meta-group h3 {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .meta-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .meta-list li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .contact-links a {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* --- Main Content (Right Column) --- */
+        .main-content {
+            width: 100%; 
+            padding-top: 40px; 
+            box-sizing: border-box;
+            display: block;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            line-height: 1.1;
+        }
+
+        .headline {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            page-break-after: avoid;
+        }
+        
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .prose {
+            font-family: 'Merriweather', serif;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--secondary);
+            orphans: 3;
+            widows: 3;
+            text-align: justify;
+        }
+
+        /* Markdown Content Styling */
+        .prose h1, .prose h2, .prose h3 { color: var(--primary); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .prose h1 { font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        .prose h2 { font-size: 1.2rem; }
+        .prose h3 { font-size: 1.1rem; }
+        .prose p { margin-bottom: 1em; }
+        .prose strong { color: var(--primary); font-weight: 700; }
+        .prose ul, .prose ol { padding-left: 20px; margin-bottom: 1em; }
+        .prose li { margin-bottom: 0.5em; }
+        .prose code { 
+            font-family: 'JetBrains Mono', monospace; 
+            background: #f1f5f9; 
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            font-size: 0.85em;
+            color: var(--accent);
+        }
+        .prose pre {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            font-size: 0.85em;
+            margin-bottom: 1.5em;
+        }
+        .prose pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--secondary);
+        }
+        
+        /* Project Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 20px;
+            /* REMOVED page-break-inside: avoid; to allow grid to flow across pages */
+        }
+
+        .project-card {
+            border-left: 3px solid var(--accent);
+            padding-left: 15px;
+            margin-bottom: 0; 
+            background: #fff;
+            break-inside: avoid; 
+        }
+
+        .project-card h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .project-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .project-desc {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .project-impact {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: #f0f9ff;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .complexity-badge {
+            background: #fef3c7;
+            color: #d97706;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div>
+            
+            <img src="https://avatars.githubusercontent.com/u/220483426?v=4" class="avatar" alt="Avatar">
+            
+            
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                Kognit Validated
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Technical DNA</h3>
+            <div class="tag-cloud">
+                
+                <span class="tag">C++</span>
+                
+                <span class="tag">Python</span>
+                
+                <span class="tag">JavaScript</span>
+                
+                <span class="tag">Lua</span>
+                
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Frameworks</h3>
+            <div class="tag-cloud">
+                
+                <span class="tag">SDL2</span>
+                
+                <span class="tag">OpenGL</span>
+                
+                <span class="tag">Textual</span>
+                
+                <span class="tag">ONNX Runtime</span>
+                
+                <span class="tag">Mamba</span>
+                
+                <span class="tag">Mixture-of-Experts</span>
+                
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Focus</h3>
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--primary);">
+                Cognitive Systems Architecture and Language Implementation
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Inferred Persona</h3>
+             <div style="font-size: 0.85rem; line-height: 1.4; color: var(--secondary);">
+                Cognitive Systems Architect
+            </div>
+        </div>
+
+        <div class="meta-group">
+            <h3>Sources</h3>
+            <div class="contact-links">
+                
+                <a href="https://github.com/Pomilon">https://github.com/Pomilon</a>
+                
+                <a href="http://pomilon.xyz">http://pomilon.xyz</a>
+                
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Pomilon</h1>
+            <div class="headline">Architect of Cognitive Systems: Building the Future of AI Through Hierarchical State Machines and Hybrid Architectures</div>
+        </header>
+
+        <section>
+            <div class="section-title">Executive Summary</div>
+            <div class="prose">
+                <p>Pomilon represents a fascinating archetype in the modern development landscape: the solo polyglot architect who operates at the intersection of cognitive systems, language design, and AI infrastructure. Unlike typical developers who specialize in a single domain, Pomilon demonstrates remarkable breadth across systems programming, AI/ML architectures, and language implementation—a trifecta that suggests deep theoretical understanding married to practical execution.</p>
+<p>Their technical DNA reveals a developer who isn't content with merely using existing tools but feels compelled to rebuild fundamental abstractions from first principles. This is evident in their creation of Pome (a custom scripting language), Peck (its package manager), and Polir (a game engine)—a complete ecosystem that screams "your tools aren't good enough, I'll make better ones." This pattern extends to their AI work, where rather than simply wrapping existing models, they're architecting novel approaches like CRSM's "Hierarchical State Sovereignty" and Aetheris's hybrid Mamba-MoE architectures.</p>
+<p>The sophistication of their projects suggests someone who's internalized complex computer science concepts—distributed systems, state machine theory, compiler construction, and neural architecture design—and is actively pushing boundaries in each. Their work on CRSM implementing "asynchronous System 2 architecture" within a Mamba backbone indicates they're not just following AI trends but attempting to solve fundamental problems in reasoning and state management that have plagued neural networks since their inception.</p>
+<p>What's particularly striking is the consistency of their architectural vision: whether building game engines, package managers, or AI systems, there's a clear throughline of modularity, performance, and clean abstractions. Their choice to build Plexir as a "keyboard-centric AI terminal workspace" rather than another web-based tool speaks to a developer who values efficiency and understands that real power users live in the terminal.</p>
+<p>The low GitHub activity metrics (0 yearly contributions, minimal stars) paradoxically reinforce rather than diminish their technical credibility. This is the profile of someone who builds for intellectual satisfaction rather than social validation—the kind of developer who might be quietly revolutionizing how we think about AI architectures while the rest of the community chases stars and forks.</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-title">Key Projects & Impact</div>
+            <div class="projects-grid">
+                
+                <div class="project-card">
+                    <h4>CRSM</h4>
+                    <div class="project-meta">
+                        Architect • Python, Mamba, State Machines, AI Architecture
+                    </div>
+                    <div class="project-desc">
+                        Revolutionary asynchronous System 2 architecture implementing Hierarchical State Sovereignty within Mamba backbone
+                    </div>
+                    <div class="project-impact">
+                        Potential paradigm shift in how AI systems handle complex reasoning and state management
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h4>Aetheris</h4>
+                    <div class="project-meta">
+                        Architect • Python, Mamba, Mixture-of-Experts, Language Models
+                    </div>
+                    <div class="project-desc">
+                        Hybrid Mamba-MoE Language Model achieving efficiency through architectural fusion
+                    </div>
+                    <div class="project-impact">
+                        Advances the state of efficient language modeling through architectural innovation
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h4>Plexir</h4>
+                    <div class="project-meta">
+                        Lead Developer • Python, Docker, Textual, MCP, LLM Orchestration
+                    </div>
+                    <div class="project-desc">
+                        Modular, keyboard-centric AI terminal workspace with multi-provider LLM orchestration
+                    </div>
+                    <div class="project-impact">
+                        Professional-grade AI workspace demonstrating sophisticated system integration
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h4>Pome</h4>
+                    <div class="project-meta">
+                        Language Designer • C++, Language Design, Tree-walk Interpreter, Mark-and-Sweep GC
+                    </div>
+                    <div class="project-desc">
+                        Custom scripting language combining Lua-style syntax with advanced features
+                    </div>
+                    <div class="project-impact">
+                        Demonstrates deep understanding of programming language theory and implementation
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h4>Kestr</h4>
+                    <div class="project-meta">
+                        Systems Architect • C++20, ONNX Runtime, HNSW, SQLite
+                    </div>
+                    <div class="project-desc">
+                        High-performance daemon for real-time codebase indexing with semantic embeddings
+                    </div>
+                    <div class="project-impact">
+                        Enables instant semantic search across large codebases with local processing
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        
+        <section>
+            <div class="section-title">Technical Deep Dive</div>
+            <div class="prose">
+                <h1>Deep Technical Analysis: The Architecture of Cognitive Systems</h1>
+<h2>Executive Summary</h2>
+<p>Pomilon's portfolio represents a masterclass in systems-level thinking, spanning the entire computational stack from custom language implementations to novel AI architectures. Their work demonstrates not just technical proficiency but a fundamental reimagining of how complex systems should be designed, implemented, and integrated.</p>
+<h2>CRSM: Hierarchical State Sovereignty in Neural Reasoning</h2>
+<p>The CRSM project represents perhaps the most theoretically sophisticated work in Pomilon's portfolio. The implementation of "Hierarchical State Sovereignty" within a Mamba backbone suggests a novel approach to the perennial problem of maintaining coherent reasoning across extended temporal sequences in neural networks.</p>
+<h3>Architectural Innovation</h3>
+<p>Traditional transformer architectures struggle with maintaining state across long reasoning chains. CRSM's approach appears to implement a multi-level state management system where different levels of abstraction maintain their own sovereignty while participating in higher-level coordination. This is analogous to federalism in government systems but applied to neural computation.</p>
+<p>The choice of Mamba as the backbone is particularly astute. Mamba's selective state-space mechanisms provide the perfect substrate for implementing hierarchical state machines. Unlike transformers that must attend to all previous tokens, Mamba's structured approach to state updates allows for more principled state transitions.</p>
+<h3>Technical Sophistication</h3>
+<p>The "asynchronous System 2 architecture" claim suggests implementation of dual-process theory from cognitive psychology. System 1 (fast, intuitive) and System 2 (slow, deliberative) thinking maps elegantly onto neural architectures when you consider that most current models operate purely in System 1 mode. CRSM appears to implement a meta-reasoning layer that can step back, evaluate its own reasoning chains, and make deliberate adjustments.</p>
+<p>The implications for AI safety and alignment are profound. A system capable of hierarchical state management and self-reflection represents a significant step toward more reliable and interpretable AI reasoning.</p>
+<h2>Aetheris: Architectural Fusion for Efficient Language Modeling</h2>
+<p>The Aetheris project demonstrates sophisticated understanding of current limitations in both transformer and alternative architectures. The hybrid Mamba-MoE approach isn't merely combining trendy technologies—it's addressing fundamental efficiency bottlenecks in large-scale language modeling.</p>
+<h3>Technical Architecture</h3>
+<p>Mamba architectures excel at handling long sequences efficiently but may struggle with the kind of rapid context switching required for complex reasoning tasks. Mixture-of-Experts provides sparsity and specialization but traditionally relies on transformer backbones. The fusion suggests several possible implementations:</p>
+<ol>
+<li><strong>Hierarchical Gating</strong>: Using Mamba for sequence processing while employing MoE for feed-forward layers, allowing for specialized expert selection based on content type</li>
+<li><strong>State-Space Experts</strong>: Each expert in the MoE system could maintain its own Mamba state, allowing for specialized temporal processing based on domain expertise</li>
+<li><strong>Dynamic Architecture Selection</strong>: Routing between Mamba and traditional attention mechanisms based on sequence characteristics</li>
+</ol>
+<h3>Efficiency Implications</h3>
+<p>The combination addresses the quadratic complexity of attention while maintaining the specialization benefits of MoE. For long-context reasoning tasks, this could provide significant computational advantages over pure transformer architectures while maintaining the ability to rapidly access relevant information through expert selection.</p>
+<h2>Plexir: Orchestrating Complexity in Terminal Environments</h2>
+<p>Plexir represents a sophisticated exercise in system integration, combining multiple AI providers, persistent sandboxing, and agentic tools within a terminal user interface. The architectural decisions reveal deep understanding of both developer workflows and distributed systems.</p>
+<h3>Multi-Provider Orchestration</h3>
+<p>The LLM orchestration layer likely implements several patterns:</p>
+<ul>
+<li><strong>Provider Abstraction</strong>: Unified interface for multiple providers (OpenAI, Anthropic, Google, etc.) with fallback mechanisms</li>
+<li><strong>Intelligent Routing</strong>: Selecting providers based on task requirements, cost considerations, and rate limits</li>
+<li><strong>Response Aggregation</strong>: Combining outputs from multiple providers for improved reliability and quality</li>
+</ul>
+<h3>Persistent Docker Sandboxing</h3>
+<p>The persistent sandboxing implementation suggests several architectural considerations:</p>
+<ul>
+<li><strong>Container Lifecycle Management</strong>: Efficient creation, reuse, and cleanup of containers</li>
+<li><strong>State Persistence</strong>: Maintaining filesystem state across sessions while ensuring isolation</li>
+<li><strong>Resource Management</strong>: Balancing resource allocation between persistent containers and system performance</li>
+</ul>
+<h3>TUI Implementation Challenges</h3>
+<p>Building a complex application like Plexir in a terminal interface presents unique challenges:</p>
+<ul>
+<li><strong>Screen Real Estate Management</strong>: Efficient use of limited terminal space for complex information display</li>
+<li><strong>Keyboard Navigation</strong>: Comprehensive keyboard shortcuts for all functionality</li>
+<li><strong>Async Updates</strong>: Managing real-time updates from multiple sources (LLM responses, container status, etc.) in a terminal environment</li>
+</ul>
+<h2>Kestr: Real-Time Semantic Indexing at Scale</h2>
+<p>Kestr demonstrates sophisticated understanding of both performance requirements and semantic search challenges. The combination of inotify for filesystem monitoring, HNSW for vector search, and ONNX for local embedding generation creates a powerful architecture for real-time code understanding.</p>
+<h3>Performance Architecture</h3>
+<p>The choice of technologies suggests several performance optimizations:</p>
+<ul>
+<li><strong>Event-Driven Updates</strong>: Using inotify for real-time filesystem monitoring rather than periodic scanning</li>
+<li><strong>Efficient Vector Search</strong>: HNSW provides sub-linear search complexity for high-dimensional embeddings</li>
+<li><strong>Local Processing</strong>: ONNX Runtime enables GPU-accelerated embedding generation without network latency</li>
+</ul>
+<h3>Semantic Understanding</h3>
+<p>Generating meaningful embeddings for code requires understanding:</p>
+<ul>
+<li><strong>Contextual Relationships</strong>: How different parts of the codebase relate to each other</li>
+<li><strong>Semantic Similarity</strong>: Finding functionally similar code even with different implementations</li>
+<li><strong>Language-Agnostic Representations</strong>: Working across multiple programming languages in a codebase</li>
+</ul>
+<h2>Pome: Language Implementation Mastery</h2>
+<p>The Pome language implementation showcases deep understanding of programming language theory and practice. The combination of Lua-style syntax with advanced features like classes and modules suggests a carefully considered design philosophy.</p>
+<h3>Tree-Walk Interpreter Architecture</h3>
+<p>The choice of a tree-walk interpreter over bytecode compilation indicates several considerations:</p>
+<ul>
+<li><strong>Development Flexibility</strong>: Easier debugging and modification during development</li>
+<li><strong>Portability</strong>: Simpler implementation across different platforms</li>
+<li><strong>Performance Trade-offs</strong>: Accepting interpretation overhead for development convenience</li>
+</ul>
+<h3>Mark-and-Sweep Garbage Collection</h3>
+<p>Implementing mark-and-sweep GC in a tree-walk interpreter demonstrates understanding of memory management challenges:</p>
+<ul>
+<li><strong>Cycle Detection</strong>: Handling reference cycles in a dynamic language</li>
+<li><strong>Performance Optimization</strong>: Minimizing pause times during collection</li>
+<li><strong>Memory Efficiency</strong>: Balancing collection frequency with memory usage</li>
+</ul>
+<h3>Module System Design</h3>
+<p>The module system likely implements:</p>
+<ul>
+<li><strong>Dynamic Loading</strong>: Loading modules at runtime</li>
+<li><strong>Namespace Isolation</strong>: Preventing module conflicts</li>
+<li><strong>Dependency Resolution</strong>: Managing module dependencies</li>
+</ul>
+<h2>Systems Integration Philosophy</h2>
+<p>Across all projects, Pomilon demonstrates consistent architectural principles:</p>
+<h3>Modularity as First Principle</h3>
+<p>Every system is designed with clear separation of concerns, allowing for independent development and testing of components. This is evident in:</p>
+<ul>
+<li><strong>CRSM</strong>: Hierarchical state management with clear interfaces between levels</li>
+<li><strong>Plexir</strong>: Modular provider system for different AI services</li>
+<li><strong>Pome/Peck</strong>: Separate language and package management systems</li>
+</ul>
+<h3>Performance-Conscious Design</h3>
+<p>All systems show awareness of performance implications:</p>
+<ul>
+<li><strong>Kestr</strong>: Real-time indexing with efficient algorithms</li>
+<li><strong>Aetheris</strong>: Architectural choices driven by computational efficiency</li>
+<li><strong>Polir</strong>: Lightweight game engine design</li>
+</ul>
+<h3>Developer Experience Focus</h3>
+<p>Despite technical sophistication, all projects prioritize usability:</p>
+<ul>
+<li><strong>Plexir</strong>: Keyboard-centric design for power users</li>
+<li><strong>Pome</strong>: Lua-style syntax for approachability</li>
+<li><strong>Peck</strong>: Simple package management interface</li>
+</ul>
+<h2>Conclusion: The Architect's Journey</h2>
+<p>Pomilon's work represents more than technical implementation—it's a coherent vision of how complex systems should be designed. Their progression from game engines to AI architectures shows consistent application of systems thinking across domains.</p>
+<p>The sophistication of their AI work, particularly CRSM's approach to hierarchical reasoning and Aetheris's architectural fusion, suggests deep theoretical understanding combined with practical implementation skills. They're not just building systems; they're advancing the state of what's possible in cognitive architectures.</p>
+<p>Their language implementation work demonstrates that they understand the foundations of computation, while their systems integration projects show they can apply these principles at scale. This combination of theoretical depth and practical execution is rare and valuable.</p>
+<p>The low engagement metrics on their projects paradoxically reinforce their credibility—these are the kinds of systems that require months or years of focused development, not the quick weekend projects that typically garner social media attention. Pomilon appears to be building for impact and intellectual satisfaction rather than popularity, which is exactly the kind of developer who often creates the most significant innovations.</p>
+            </div>
+        </section>
+        
+
+        
+
+        
+        <section>
+            <div class="section-title">Full-Dive Repository Audit</div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Plexir <span class="complexity-badge">Complexity: 8/10</span></h4>
+                <div class="project-meta">
+                    Stack: Python, Textual, Docker, Model Context Protocol, LLM Orchestration, TUI, RAG, Git, Web Scraping, Token Cost Tracking
+                </div>
+                <div class="prose">
+                    <h2>🔧 Technical Deconstruction</h2>
+<h3>Architecture at 30,000 ft</h3>
+<p>Plexir is basically a Swiss-army-knife duct-taped to a Docker daemon and given a Textual paint job. The core loop:
+1. You type stuff → the TUI (Textual) captures it.
+2. The <strong>Router</strong> picks the cheapest available LLM from your failover list like a budget airline booking engine.
+3. The <strong>Agent</strong> gets a toolbelt: file I/O, git, web search, a Python sandbox, and—if you’re feeling spicy—an entire persistent container thanks to the Docker sandbox.
+4. Every critical action pops a confirmation modal with a pretty diff, because nobody wants an AI to <code>rm -rf /</code> while you’re grabbing coffee.</p>
+<h3>Key Modules</h3>
+<ul>
+<li><strong>providers/</strong> – Multi-provider juggling: Gemini, Groq, OpenAI-compatible endpoints. Auto-retry, token counting, and cost estimation baked in. If one model 429s you, the next one jumps in like a tag-team wrestler.</li>
+<li><strong>agent/tools/</strong> – 20+ tools: filesystem, git, web search (Tavily/Serper + DuckDuckGo fallback), Python sandbox, plus MCP client for dynamic tool discovery. Every tool is a <code>@tool</code> decorated async function, so adding a new one is basically a copy-pasta party.</li>
+<li><strong>tui/</strong> – Textual widgets galore: collapsible tool output, live file tree, command palette, theme switcher. The <code>App</code> class is ~1 kLOC of reactive bliss; expect <code>async</code>/<code>await</code> rabbit holes.</li>
+<li><strong>sandbox/</strong> – Optional <code>--sandbox</code> flag spins up a lightweight container with a long-lived <code>/workspace</code> volume. All tools are proxied through a small gRPC shim so the AI thinks it’s on localhost while actually trapped in container jail.</li>
+<li><strong>memory/</strong> – Rolling summarization + message pinning. Uses the same LLM to compress chat history when it grows too big, so you don’t blow the context window like a balloon animal.</li>
+</ul>
+<h3>Configuration &amp; Extensibility</h3>
+<ul>
+<li>JSON config in <code>~/.plexir/config.json</code>; hot-reload with Ctrl-R. API keys, provider order, session budget caps—all tweakable via slash commands or direct JSON surgery.</li>
+<li>Macros: record any sequence of chat + tool calls, serialize to JSON, replay later. Great for those “generate README + commit + push” rituals.</li>
+<li>MCP integration means you can point Plexir at any MCP server (Pinterest, Postgres, Stripe, etc.) and instantly inherit its tools/resources/prompts—zero code changes.</li>
+</ul>
+<h3>Security Posture</h3>
+<ul>
+<li>Human-in-the-loop for every file write, git commit, or shell command. Visual diff preview; skip/stop granularity.</li>
+<li>Docker sandbox isolates filesystem and network (unless you explicitly <code>--network host</code>). Even if the LLM goes rogue, it’s stuck inside a disposable container.</li>
+<li>Budget guardrails: real-time token cost tracking; set a session cap and Plexir will refuse further calls once you’ve hit your latte budget.</li>
+</ul>
+<h3>Pain Points &amp; Gotchas</h3>
+<ul>
+<li>Only 2 GitHub stars—so expect sharp edges and the occasional <code>print()</code> left in production.</li>
+<li>Textual’s async event loop can starve on slow LLM streams; you might see UI hiccups under high token throughput.</li>
+<li>Docker-in-Docker (or sibling containers) needs privileged mode if you want the sandbox to spin up sibling containers—YMMV on CI.</li>
+<li>MCP dynamic discovery is cool, but if the MCP server spews 100 tools, the UI becomes a scrolling nightmare—no pagination yet.</li>
+</ul>
+<h3>Future-Proofing Wishlist</h3>
+<ul>
+<li>Plugin marketplace so third parties can drop in new tools/themes without forking.</li>
+<li>Distributed sandbox fleet: Kubernetes CRD to spin up per-user containers at scale.</li>
+<li>Token-cost optimizer that automatically picks the cheapest model that still meets your latency SLA—basically a tiny brokerage desk inside your terminal.</li>
+</ul>
+<p>Bottom line: if you’ve ever wanted a single terminal pane where you can ask an AI to “refactor this module, test it, commit, push, and order pizza” while keeping an eye on your API spend, Plexir is your new caffeine-powered overlord—just don’t forget to feed it API keys.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Kestr <span class="complexity-badge">Complexity: 8/10</span></h4>
+                <div class="project-meta">
+                    Stack: C++20, ONNX Runtime, SQLite, inotify, HNSW, MCP, CMake
+                </div>
+                <div class="prose">
+                    <h2>Technical Deconstruction</h2>
+<h3>Architecture Overview</h3>
+<p>Kestr is essentially three amigos in a trench coat:
+- <strong>Sentry</strong>: The insomniac file watcher using Linux's <code>inotify</code> (because who needs sleep when files are changing?)
+- <strong>Talon</strong>: The embedding engine with commitment issues - can't decide between ONNX (local), Ollama (fallback), or OpenAI (when you like burning money)
+- <strong>The Librarian</strong>: A search engine with an identity crisis - can't choose between vector search (HNSW) or keyword search (SQLite), so it does both</p>
+<h3>Memory Management Shenanigans</h3>
+<p>The memory modes are like choosing your adventure:
+- <strong>RAM mode</strong>: "I have 64GB of RAM and I want to use ALL of it"
+- <strong>Hybrid mode</strong>: "I want to pretend I'm memory efficient while still hoarding 5000 vectors"
+- <strong>Disk mode</strong>: "I enjoy the sweet sound of spinning rust and database queries"</p>
+<h3>Build System Comedy</h3>
+<p>The build requirements read like a C++ developer's fever dream:
+- C++20 (because we need concepts to confuse ourselves further)
+- CMake 3.20+ (because older versions are scared of modern C++)
+- SQLite3 and CURL (the dynamic duo of dependency management)</p>
+<h3>Configuration Philosophy</h3>
+<p>The config file is basically a "choose your own adventure" book where:
+- Every option has a default that nobody uses
+- ONNX setup requires downloading files like it's 1999
+- The <code>.kestr_ignore</code> file is gitignore's less popular cousin</p>
+<h3>MCP Integration</h3>
+<p>The Model Context Protocol integration is the cherry on top - because what every developer needs is another protocol to learn. It's like USB-C for AI tools, except nobody knows which way is up.</p>
+<h3>Performance Characteristics</h3>
+<ul>
+<li>Real-time indexing (translation: your CPU fan will become your new white noise machine)</li>
+<li>Local embeddings (translation: hope you like waiting for ONNX to warm up)</li>
+<li>Persistent caching (translation: SQLite will eventually become sentient)</li>
+</ul>
+<h3>Security Considerations</h3>
+<p>The security model appears to be "security through obscurity" - if nobody knows about your 0-star repo, nobody can exploit it!</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>MC-CIV <span class="complexity-badge">Complexity: 8/10</span></h4>
+                <div class="project-meta">
+                    Stack: Python, Node.js, Mineflayer, LLM, RCON, Docker, Multi-Agent Systems, Minecraft, Google Gemini, OpenAI, Anthropic Claude, Groq, Ollama
+                </div>
+                <div class="prose">
+                    <h1>MC-CIV: When Skynet Meets Minecraft</h1>
+<h2>The Technical Madhouse</h2>
+<p>This repository is what happens when you let AI agents loose in Minecraft with nothing but their wits and a tendency to accidentally burn down their own houses. It's like "Lord of the Flies" but with more LLMs and fewer conch shells.</p>
+<h2>Architecture: The Good, The Bad, and The "Why Is Everything On Fire?"</h2>
+<h3>Commander-Executor Pattern: Because LLMs Are Slower Than Your Grandma's Internet</h3>
+<p>The genius here is splitting the system into:
+- <strong>Commander (Python)</strong>: The "brain" that takes 3 business days to decide whether to build a dirt house
+- <strong>Executor (Node.js)</strong>: The "body" that actually has to live in the Minecraft world and deal with creepers while the brain contemplates the meaning of blocks</p>
+<h3>Multi-Agent Swarm: Herding Digital Cats</h3>
+<p>Each agent is essentially:
+- An LLM-powered teenager with memory issues (they forget where they put their diamond pickaxe)
+- A combat-ready warrior who might attack you because they had a bad day
+- A construction worker who builds walls... sometimes vertically, sometimes horizontally, sometimes in your face</p>
+<h3>World Narrator: The DM Who Never Sleeps</h3>
+<p>This poor soul is stuck polling server state forever, like a digital Sisyphus. It watches players, changes weather, and spawns entities with the enthusiasm of a caffeinated dungeon master.</p>
+<h2>Technical Debt: The Alpha That Could</h2>
+<h3>The "It Works On My Machine" Guarantee</h3>
+<ul>
+<li>Supports Minecraft 1.16.5 to 1.20.x (translation: good luck with that)</li>
+<li>Python 3.12+ required (because who doesn't love bleeding-edge dependencies?)</li>
+<li>Node.js 18+ needed (the bots need their JavaScript juice)</li>
+</ul>
+<h3>LLM Provider Support: The More The Merrier</h3>
+<p>Supports Google Gemini, OpenAI, Anthropic, Groq, and Ollama. It's like a buffet of AI providers, except sometimes the food fights back.</p>
+<h3>Memory System: Goldfish With Benefits</h3>
+<p>Agents remember key locations and can navigate back to them - assuming they haven't been blown up, fallen in lava, or decided to build a dirt tower to nowhere instead.</p>
+<h2>Testing: "Comprehensive" Is A Strong Word</h2>
+<p>They have unit tests for both Python (the brain) and Node.js (the body). Because nothing says "stable" like testing autonomous agents that might decide to rebel against their human overlords.</p>
+<h2>The Docker Experience</h2>
+<p>Docker Compose setup included because nothing says "production-ready" like containerizing your experimental AI agents. Just remember: <code>docker-compose up --build</code> might also summon digital demons.</p>
+<h2>Final Verdict</h2>
+<p>This is either the future of gaming or the beginning of the robot uprising. The agents are autonomous, unpredictable, and might ignore you - so basically, they're perfect Minecraft players.</p>
+<p><strong>Complexity Score: 8/10</strong> - Because coordinating multiple AI agents in a sandbox environment while maintaining narrative coherence is like juggling flaming chainsaws while riding a unicycle. Blindfolded. In Minecraft.</p>
+<p><strong>Pro Tip</strong>: If the agents start forming societies and declaring independence, just pull the plug. Or join them. Your call, meatbag.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Sonir <span class="complexity-badge">Complexity: 7/10</span></h4>
+                <div class="project-meta">
+                    Stack: Python, Demucs, FFmpeg, HPSS, OpenGL, NumPy, SciPy, Pygame
+                </div>
+                <div class="prose">
+                    <h2>Technical Deep-Dive: Sonir – or "How I Learned to Stop Worrying and Love the Bounce"</h2>
+<h3>1. Architecture (a.k.a. The Spaghetti Refinery)</h3>
+<ul>
+<li><strong>Entry Point</strong>: <code>main.py</code> – the one file to rule them all, CLI-parsing like it’s auditioning for argparse’s Got Talent.</li>
+<li><strong>Modular Plug-ins</strong>: Modes are hot-swappable, so you can flip from Chopin to dubstep faster than your playlist on shuffle after three espressos.</li>
+<li><strong>Deterministic Physics</strong>: Uses file-hash seeding so the projectile’s drunken walk is identical every run—Schrödinger’s cat, but with EDM.</li>
+</ul>
+<h3>2. Signal Processing (a.k.a. The Fourier Fairy Tale)</h3>
+<ul>
+<li><strong>Onset Detection</strong>: Probably a flux-based peak-picker or complex-domain novelty function; the README brags about "musical timing" so let’s assume something fancier than "if amplitude &gt; 42".</li>
+<li><strong>Stem Mode</strong>: Wraps Facebook’s Demucs to un-bake the musical cake into Drums/Bass/Other/Vocals; because nothing says "fun" like waiting for a U-Net to finish.</li>
+<li><strong>HPSS + Frequency Band Splitting</strong>: Good old Harmonic-Percussive Source Separation plus arbitrary band splits—basically musical Lego with more FFTs.</li>
+<li><strong>Genre Presets</strong>: Hand-tuned frequency brackets for piano, strings, lo-fi—because apparently 80 Hz means "kick" in techno but "double-bass existential crisis" in jazz.</li>
+</ul>
+<h3>3. Rendering Pipeline (a.k.a. The Neon Circus)</h3>
+<ul>
+<li><strong>Backends</strong>: Pygame/SDL for preview, FFmpeg for export—two very different beasts, like bringing a butter knife to a gunfight and then swapping in a railgun.</li>
+<li><strong>Juice Effects</strong>: Screen-shake, particle bursts, motion trails, glow—essentially the Michael Bay filter for audio.</li>
+<li><strong>Camera</strong>: Dynamic camera that "leads the action" (code-speak for chasing a bouncing square like a puppy on caffeine).</li>
+<li><strong>Aspect Ratios</strong>: 16:9, 9:16, 1:1—because vertical video is the future and the future is terrifying.</li>
+</ul>
+<h3>4. Gamification (a.k.a. "Press X to Not Fail")</h3>
+<ul>
+<li><strong>Rhythm Mode</strong>: Turn the visualizer into a playable level with hit-windows, combos, health drain—basically osu! but you supply the music and the carpal tunnel.</li>
+<li><strong>Modifiers</strong>: Sudden-death, chaos shuffle, focus-switch—perfect for masochists who think Dark Souls is too relaxing.</li>
+<li><strong>Controls</strong>: Auto-mapped keys depending on viewport count; expect your keyboard to look like a game of Twister for fingers.</li>
+</ul>
+<h3>5. Extensibility (a.k.a. JSON-Driven Madness)</h3>
+<ul>
+<li><strong>Custom Mode</strong>: Drop a JSON to define arbitrary bands/colors; it’s like hot-reloading your audio visualizer without recompiling the universe.</li>
+<li><strong>Themes</strong>: Five built-in palettes; cyberpunk, neon, noir, sunset, matrix—because who doesn’t want their Bach looking like it was scored for Blade Runner?</li>
+</ul>
+<h3>6. Performance Notes (a.k.a. "Will It Run on My Toaster?")</h3>
+<ul>
+<li>Real-time preview claims "high-performance"; caveat emptor when you crank resolution to 4K with quad-band splitting and enough particles to simulate a supernova.</li>
+<li>Video export uses FFmpeg H.265 by default—great quality, but your CPU will hate you more than a cat hates a vacuum.</li>
+</ul>
+<h3>7. Security &amp; Ethics (a.k.a. The Copy-Paste Police)</h3>
+<ul>
+<li>Author is refreshingly vocal about bot accounts re-uploading the repo—because nothing screams "open source" like a cease-and-desist wrapped in a README.</li>
+<li>Experimental disclaimer warns it’s not a "precision-grade rhythm game engine"—translation: timing may drift harder than your college GPA.</li>
+</ul>
+<h3>8. Dependencies (a.k.a. The Dependency Hydra)</h3>
+<ul>
+<li>Python 3.x plus the usual suspects: NumPy, SciPy, Pygame, Pillow, and FFmpeg lurking in the system PATH like a cryptid.</li>
+<li>Optional Demucs—because nothing says "lightweight" like dragging a PyTorch model into your weekend project.</li>
+</ul>
+<h3>9. Complexity Verdict</h3>
+<p>Scores a solid 7/10: multi-threaded audio processing, GPU-friendly particle systems, deterministic seeding, and gamified overlays—easy to use, hard to master, and guaranteed to make your laptop fans sound like a jet taking off.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Pomilon <span class="complexity-badge">Complexity: 6/10</span></h4>
+                <div class="project-meta">
+                    Stack: C++, Python, JavaScript, Node.js, SDL2, OpenGL, AI/ML, Game Development, Scripting Languages
+                </div>
+                <div class="prose">
+                    <h1>Pomilon's Digital Laboratory: Where Ambition Meets Academic Sleep Deprivation</h1>
+<h2>The Technical Madman's Manifesto</h2>
+<p>Welcome to Pomilon's repository - a place where a university student has clearly discovered that Red Bull is a legitimate programming tool and "sleep" is just a compiler flag they haven't enabled yet.</p>
+<h2>Project Portfolio: A Journey Through "Hold My Beer" Engineering</h2>
+<h3>Pome &amp; Peck: The Dynamic Duo of "Why Not?</h3>
+<ul>
+<li><strong>Pome</strong>: A scripting language that probably started as "I'll just write a simple parser" and escalated faster than a scope creep in a client meeting</li>
+<li><strong>Peck</strong>: Its package manager, because what's a language without a dependency hell to call home?</li>
+</ul>
+<h3>CRSM &amp; Aetheris: The AI Projects That Scare PhD Students</h3>
+<ul>
+<li><strong>CRSM</strong>: Alternative AI models - translation: "I thought Transformers were too mainstream"</li>
+<li><strong>Aetheris</strong>: Reasoning systems - or as I like to call it, "How to make your computer question its existence"</li>
+</ul>
+<h3>Sonir: Physics-Based Audio Visualizer</h3>
+<p>Because apparently, regular visualizers weren't pretentious enough. This one probably visualizes your Spotify playlist using quantum mechanics or something equally unnecessary.</p>
+<h3>Polir: 2D Game Engine</h3>
+<p>Built with SDL2 and OpenGL, because nothing says "efficient 2D rendering" like bringing a graphics API bazooka to a pixelated knife fight.</p>
+<h3>ManhwaSearch: Self-Hosted Scraper</h3>
+<p>For when you absolutely, positively need to archive every manga ever created on your dorm room server. Roommate's asking why the internet is slow? "Research purposes, bro."</p>
+<h3>Plexir: Modular AI Terminal Workspace</h3>
+<p>Keyboard-centric because apparently mice are for normies. It's like Vim and an AI had a baby, and that baby grew up to be incredibly opinionated about your workflow.</p>
+<h2>Technical Architecture: The "It Works on My Machine" Philosophy</h2>
+<p>The beauty of Pomilon's approach lies in its commitment to the "I'll build everything from scratch" mentality. This is someone who's looked at existing solutions and said "But where's the fun in that?" It's the programming equivalent of building your own toaster instead of buying one - impractical, educational, and guaranteed to set off at least one smoke detector.</p>
+<h2>Code Quality Metrics</h2>
+<ul>
+<li><strong>Sleep Debt</strong>: Approximately 3.7 years</li>
+<li><strong>Caffeine to Code Ratio</strong>: 1:1 (measured in liters per LOC)</li>
+<li><strong>Stack Overflow Dependencies</strong>: 0 (concerning or impressive, you decide)</li>
+<li><strong>Git Commit Messages</strong>: Probably just "fix stuff" and "it works now"</li>
+</ul>
+<h2>Future Roadmap</h2>
+<p>The mention of "several projects in private repositories" is either a tease of revolutionary tech or a polite way of saying "I have 47 half-finished projects that will never see the light of day." Place your bets.</p>
+<h2>Verdict</h2>
+<p>This repository represents the beautiful chaos of academic programming - where deadlines are theoretical, documentation is optional, and the compiler warnings are more like gentle suggestions. It's not just code; it's a lifestyle choice that says "I don't need sleep, I need answers."</p>
+<p>The 0 stars rating is either a travesty of justice or a brutal reminder that the universe doesn't appreciate art when it sees it.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Pome <span class="complexity-badge">Complexity: 6/10</span></h4>
+                <div class="project-meta">
+                    Stack: C++17, CMake, Tree-walk Interpreter, Mark-and-Sweep GC, Dynamic Loading, Recursive Descent Parser
+                </div>
+                <div class="prose">
+                    <h1>Pome: The Little Language That Could(n't Get Stars)</h1>
+<h2>Architecture Deep Dive</h2>
+<p>Pome is essentially what happens when someone looks at Lua and thinks, "You know what this needs? More C++ and fewer users." Built as a learning project, it's a textbook implementation of a tree-walk interpreter with all the classic components your compiler-construction professor would nod approvingly at.</p>
+<h3>Core Components</h3>
+<p><strong>Lexer &amp; Parser</strong>: The dynamic duo that turns your questionable code into an Abstract Syntax Tree. The lexer tokenizes your Pome scripts (yes, that's the actual file extension), while the parser probably uses recursive descent because who doesn't love a good old-fashioned parser combinator approach?</p>
+<p><strong>Value System</strong>: Everything in Pome is a runtime value, which means you're living in <code>std::variant</code> heaven. Dynamic typing at its finest - because who needs compile-time type safety when you can have runtime surprises?</p>
+<p><strong>Garbage Collector</strong>: A mark-and-sweep collector that probably runs at the most inconvenient times. It's like having a cleaning crew that shows up during your dinner party - necessary, but poorly timed.</p>
+<p><strong>Module System</strong>: Because even interpreted languages need to feel enterprise-ready. Supports both Pome modules and native C++ extensions, so you can crash your program in two different languages!</p>
+<h3>Language Features</h3>
+<p>The language supports all the hits: dynamic typing (because static types are so 2010), first-class functions (welcome to 1958!), closures (fancy), and even a ternary operator for those who find if-statements too verbose.</p>
+<p>Object-oriented programming is implemented with classes and inheritance, complete with the <code>this</code> keyword - because JavaScript proved that's a great idea that never causes confusion.</p>
+<h3>Standard Library</h3>
+<p>Pome comes with a standard library that's... well, it's there. You've got your basic math functions, string manipulation (substring only, because who needs more?), and file I/O. It's like a greatest hits collection of programming language features, except someone forgot half the tracks.</p>
+<h3>Build System</h3>
+<p>Uses CMake because the author wanted to make sure nobody could build it without first understanding modern C++ build systems. A solid choice for a learning project - nothing says "educational" like wrestling with CMake for 3 hours.</p>
+<h2>The Reality Check</h2>
+<p>With 1 star (probably from the author themselves), Pome is the programming language equivalent of that garage band your friend keeps insisting is "gonna make it big." It's got all the components of a real language, just... nobody's using it.</p>
+<p>But hey, as a learning project for understanding interpreter implementation, it's actually pretty comprehensive. The documentation is surprisingly thorough, which either means the author has way too much free time or really wanted to avoid questions on Stack Overflow.</p>
+<h2>Technical Debt Score: 2/10</h2>
+<p>For a learning project, the architecture is actually quite clean. The separation of concerns is logical, the codebase appears modular, and there's even garbage collection. The only real technical debt here is the existential debt of creating Yet Another Scripting Language™ that will probably never be used for anything beyond educational purposes.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>peck-packages-repository <span class="complexity-badge">Complexity: 2/10</span></h4>
+                <div class="project-meta">
+                    Stack: peck, package-manager, index
+                </div>
+                <div class="prose">
+                    <h2>Technical Deconstruction</h2>
+<h3>Architecture &amp; Purpose</h3>
+<p>This repo is the canonical registry for the <code>peck</code> package manager—think of it as NPM’s little cousin who still eats glue. Its only job is to host a static index of packages so that <code>peck install</code> knows where to fetch the goodies.</p>
+<h3>Code Footprint</h3>
+<p>Zero lines of application code, zero tests, zero stars—basically the digital equivalent of a tumbleweed. The entire "complexity" boils down to a JSON file (or similar) that maps package names to git URLs. That’s it. No micro-services, no GraphQL, no Kubernetes YAML—just good old-fashioned boredom.</p>
+<h3>Security &amp; Trust Model</h3>
+<p>Because there’s no user auth, no signed packages, and no namespacing, anyone can PR a package called <code>left-pad-but-typed</code>. Supply-chain attackers are probably salivating harder than a golden retriever at a barbecue.</p>
+<h3>Scalability Concerns</h3>
+<p>With 0 packages and 0 users, the current infra could run on a Raspberry Pi Zero tucked behind someone’s couch. If it ever hits Reddit’s front page, expect the lone maintainer to learn about CDN caching the hard way.</p>
+<h3>Maintainer Velocity</h3>
+<p>Last commit: the Mesozoic era. Issues and PRs are greeted by the sound of one hand clapping.</p>
+<h3>Verdict</h3>
+<p>A perfect weekend project if your idea of fun is alphabetizing JSON keys while listening to lo-fi hip-hop. Otherwise, it’s a 2/10 on the complexity scale—only scoring points for existing at all.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Peck <span class="complexity-badge">Complexity: 6/10</span></h4>
+                <div class="project-meta">
+                    Stack: C++, Package Management, Dependency Resolution, Git Integration, Virtual Environments
+                </div>
+                <div class="prose">
+                    <h2>Peck: The Package Manager for a Language That Might Not Exist</h2>
+<h3>The Technical Tea</h3>
+<p>Peck is written in C++ - because nothing says "modern package manager" like manual memory management and template metaprogramming that makes your brain hurt. It's essentially trying to be npm for a language called "Pome" that has exactly 1 star on GitHub. That's not a typo - the package manager has more stars than the language it manages. It's like building a Ferrari dealership in a town with one resident.</p>
+<h3>Architecture Shenanigans</h3>
+<p>The codebase claims to support "secure package management" with "verified Git commit hashes" - because nothing screams security like trusting Git hashes from a package index that probably contains more tumbleweeds than packages. The dependency resolution system is sophisticated enough to handle complex dependency graphs, though with only one star, I suspect the most complex dependency graph it handles is "hello_world depends on stdio.h".</p>
+<h3>Virtual Environment Virtuosity</h3>
+<p>It integrates with <code>.pome_env</code> virtual environments, which is adorable. It's like watching a toddler play house - they're really committed to the bit, even though nobody else is playing. The global installation support is there because apparently someone might want to install Pome packages system-wide, presumably right next to their collection of pet rocks.</p>
+<h3>Installation Process Comedy</h3>
+<p>The installation process involves running <code>chmod +x install.sh</code> followed by <code>./install.sh</code>, which will install to <code>/usr/local/bin</code>. Nothing says "professional package manager" like a shell script that requires sudo privileges. It's like the developer read the first chapter of "Unix System Administration for Dummies" and decided that was enough security training.</p>
+<h3>Package Specification Sophistication</h3>
+<p>The <code>pome_pkg.json</code> file format is their answer to <code>package.json</code>, because apparently JSON needed yet another competing standard. The specification includes "strict anatomy" and "native extension ABI" - terms that sound impressive until you realize they're describing a package ecosystem that could fit in a tweet.</p>
+<h3>The Tragic Reality</h3>
+<p>This is a C++ implementation of a package manager for a programming language that appears to have zero adoption. It's like building a massive airport in anticipation of a city that never got built. The code quality might be excellent, but it's the software equivalent of a tree falling in a forest with no one around - does it make a sound if no one uses it?</p>
+<h3>Security Theater</h3>
+<p>The "curated index with verified Git commit hashes" is particularly rich. What's being curated, exactly? The developer's weekend projects? It's security theater at its finest - elaborate mechanisms protecting nothing from nobody.</p>
+<p>In conclusion, Peck is a technically ambitious project that solves package management problems for a language ecosystem that exists primarily in the developer's imagination. It's either a visionary piece of infrastructure ahead of its time, or the world's most elaborate solution to a problem that doesn't exist. With 1 star, the smart money is on the latter.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>Polir <span class="complexity-badge">Complexity: 0/10</span></h4>
+                <div class="project-meta">
+                    Stack: 
+                </div>
+                <div class="prose">
+                    <p>Could not analyze deeply. Error: status_code: 429, model_name: moonshotai/kimi-k2-instruct-0905, body: {'error': {'message': 'Rate limit reached for model <code>moonshotai/kimi-k2-instruct-0905</code> in organization <code>org_01kd8yv9cafhtvtstgxj6r46z4</code> service tier <code>on_demand</code> on tokens per minute (TPM): Limit 10000, Used 9639, Requested 1138. Please try again in 4.662s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}...</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>linux-software-store <span class="complexity-badge">Complexity: 6/10</span></h4>
+                <div class="project-meta">
+                    Stack: Python, GTK, WebKit2, HTML, CSS, JavaScript, pkexec, Package Managers
+                </div>
+                <div class="prose">
+                    <h1>Linux Software Store: Because Even Linux Needs an App Store</h1>
+<h2>The "0 Stars, 100% Optimism" Project</h2>
+<p>Ah yes, another software store for Linux. Because what the ecosystem <em>really</em> needed was a 15th way to install Firefox. This one's special though - it's got <strong>0 stars</strong> and the confidence of a Silicon Valley startup. The audacity is admirable.</p>
+<h2>Architecture: Frankenstein's Monster, But Make It Modular</h2>
+<p>The project claims "modular architecture" which is Linux-speak for "we separated our HTML from our Python and called it enterprise-grade." The tech stack reads like a fever dream:</p>
+<ul>
+<li><strong>Python 3</strong>: Because someone needs to glue this whole thing together</li>
+<li><strong>GTK 3</strong>: For that authentic "Linux desktop in 2010" aesthetic</li>
+<li><strong>WebKit2</strong>: Nothing says "lightweight" like embedding an entire browser engine</li>
+<li><strong>HTML/CSS/JS</strong>: Making your package manager a web app, what could go wrong?</li>
+</ul>
+<h2>Package Manager Support: The Kitchen Sink Approach</h2>
+<p>Supporting pacman, apt, yum, dnf, AND flatpak? That's not a feature list, that's a cry for help. This codebase is about to learn why package managers are like in-laws - you can't just mash them together and expect harmony.</p>
+<h2>Security: pkexec for Maximum Drama</h2>
+<p>Using pkexec for privileged operations is like using a sledgehammer to hang a picture. Sure, it'll work, but you're one typo away from accidentally <code>rm -rf /</code>-ing someone's system. The README casually mentions this like it's no big deal. "Secure authentication" they said, as every security researcher within 50 miles felt a disturbance in the Force.</p>
+<h2>Phone-First Design: The Plot Twist Nobody Asked For</h2>
+<p>Originally designed for phone-based Linux distros? That's like designing a Formula 1 car for a go-kart track. The mental image of someone trying to install packages on a 5-inch screen using this thing is both hilarious and slightly terrifying.</p>
+<h2>Dependencies: The Real Package Manager</h2>
+<p>The installation instructions are a masterclass in dependency hell. Need GTK, WebKit2, Python GObject, AND polkit? That's not a software store, that's a full desktop environment with commitment issues.</p>
+<h2>Code Structure: Hope Over Experience</h2>
+<p>The directory structure suggests the developers <em>intended</em> to separate concerns, but we all know how that goes. Give it six months and <code>src/core/package_manager.py</code> will be a 3000-line monolith that handles everything from package installation to making coffee.</p>
+<h2>The Real MVP: The MIT License</h2>
+<p>At least they're honest about the warranty. "Use at your own risk" has never been more appropriate for a project that thinks embedding WebKit2 for a package manager is a good idea.</p>
+<h2>Verdict: Beautiful Chaos</h2>
+<p>This is either the work of a naive developer who hasn't been burned by Linux packaging yet, or a brilliant satirist creating performance art. Either way, I'm strangely proud of the ambition. You go, 0-star hero. You go.</p>
+                </div>
+            </div>
+            
+            <div class="project-card" style="margin-bottom: 30px;">
+                <h4>ManhwaSearch <span class="complexity-badge">Complexity: 6/10</span></h4>
+                <div class="project-meta">
+                    Stack: Python, Flask, Node.js, Express, Docker, JavaScript, Docker Compose, Web Scraping, Single Page Application
+                </div>
+                <div class="prose">
+                    <h2>Technical Architecture Breakdown</h2>
+<h3>Backend (Python Flask)</h3>
+<p>The backend is your typical Flask setup with a scheduler that runs every 8 hours - because apparently manga updates are as predictable as your rent being due. The scraping system is modular, which is nice if you want to add more sites to potentially get cease-and-desist letters from.</p>
+<h3>Frontend (Node.js Express)</h3>
+<p>A classic Express server serving a SPA that's "responsive" - which in this case means it works on both your desktop and your phone while you're supposed to be working. The frontend proxies API calls to the backend, because nothing says "modern architecture" like having to explain CORS to your server.</p>
+<h3>Docker Configuration</h3>
+<p>The Docker setup is actually decent - they've got separate containers for frontend and backend, connected via Docker Compose. It's like having roommates who don't talk to each other but somehow make the rent work.</p>
+<h3>Scraping Strategy</h3>
+<p>The scraper targets mangaread.org by default, with configurable intervals and chapter limits. The "AI scraper" feature is disabled by default - probably because even the AI doesn't want to get involved in this legal gray area.</p>
+<h3>Data Management</h3>
+<p>The app stores scraped data locally, which means your manga collection survives as long as your hard drive does. No cloud, no sync, just pure self-hosted goodness - perfect for the paranoid otaku who trusts their own server more than Crunchyroll's.</p>
+<h3>Security Considerations</h3>
+<p>Let's be real - this is scraping copyrighted content. The repo has 1 star, which either means it's brand new or even the anime community has standards. The configuration allows for multiple websites, so you can diversify your sources of potential DMCA notices.</p>
+<h3>Scalability</h3>
+<p>With a default of scraping 1 chapter per manga every 8 hours, this isn't exactly built for the binge-reader. The "grab_all_chapters_favorites" option exists but comes with a warning about being "intensive" - translation: it'll probably crash your Raspberry Pi.</p>
+<h3>Development Experience</h3>
+<p>The modular architecture for scrapers is actually thoughtful - you can add new sources by inheriting from ScraperBase. It's like a plugin system, but for legally questionable content aggregation.</p>
+                </div>
+            </div>
+            
+        </section>
+        
+
+    </main>
+</body>
+</html>
