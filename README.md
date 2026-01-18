@@ -28,6 +28,8 @@ Get a full technical audit of a GitHub profile in seconds (no API key required f
     ```
 3.  **View Report:** Open `profile.pdf`!
 
+> **Note**: for the best results use `--model groq:moonshotai/kimi-k2-instruct-0905`.
+
 ---
 
 ## Gallery of Outputs
