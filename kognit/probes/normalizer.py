@@ -2,12 +2,10 @@ from typing import Dict, Any, List
 
 def normalize_profile_context(
     github_data: Dict[str, Any], 
-    external_content: Dict[str, str],
-    search_results: List[Dict[str, str]] = [],
     include_readmes: bool = True
 ) -> str:
     """
-    Combines GitHub data, external web content, and search results into a single context string.
+    Transforms GitHub GraphQL data into a dense, searchable Markdown context.
     """
     lines = ["# Developer Digital Footprint\n"]
     
@@ -29,14 +27,6 @@ def normalize_profile_context(
     lines.append(f"Total Contributions (Year): {user.get('contributionsCollection', {}).get('contributionCalendar', {}).get('totalContributions')}")
     lines.append("")
     
-    # Search Context
-    if search_results:
-        lines.append("## Web Search Context (Online Presence)")
-        for res in search_results:
-            lines.append(f"- [{res.get('title')}]({res.get('href')})")
-            lines.append(f"  Snippet: {res.get('body')}")
-        lines.append("")
-
     # Pinned Items
     lines.append("## Pinned Projects (High Signal)")
     pinned = user.get("pinnedItems", {}).get("nodes", [])
@@ -69,19 +59,12 @@ def normalize_profile_context(
         lines.append(f"  Stack: {', '.join(langs)}")
         lines.append(f"  Stars: {repo.get('stargazerCount')} | Updated: {repo.get('pushedAt')}")
         
-        # README Snippet for top repos (Limited to first 10 for deep context)
+        # README Snippet for top repos
         if include_readmes and i < 15:
             readme = repo.get("readme")
             if readme and isinstance(readme, dict) and readme.get("text"):
                  lines.append(f"  README Extract: {readme.get('text')[:1000]}...")
              
     lines.append("")
-
-    # External Content
-    if external_content:
-        lines.append("## External Web Content (Blogs/Portfolios)")
-        for url, content in external_content.items():
-            lines.append(f"### Source: {url}")
-            lines.append(f"```markdown\n{content[:2000]}\n```\n... (content truncated)\n")
 
     return "\n".join(lines)

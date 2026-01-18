@@ -10,6 +10,8 @@ Most developer profiling tools I've encountered are either too shallow—viewing
 
 I built Kognit for fun, as a hobby project, because I wanted a tool that could dig deeper. It's not a product; it's an experiment in agentic reasoning to see if an AI can truly understand a developer's work by reading their documentation, project structure, and technical explanations, just like a human engineer would.
 
+---
+
 ## ⚡ Quick Start
 
 Get a full technical audit of a GitHub profile in seconds (no API key required for browser mode):
@@ -44,14 +46,12 @@ Kognit adapts its voice and depth to your needs. Check out these examples:
 ## Key Capabilities
 
 ### Multi-Modal Scraping ("The Probes")
-- **GitHub Deep-Probe:** Connects via GraphQL (API) or mimics browser behavior (Browser) to fetch comprehensive data: pinned items, contribution graphs, top repositories, and starred projects.
-- **Web-Probe:** Spiders out to external links (personal blogs, portfolios, Twitter/X) to gather "soft skill" context and writing style.
-- **Search-Probe:** Performs live DuckDuckGo searches to find external mentions, news, or community discussions about the developer.
+- **GitHub Deep-Probe:** Connects via GraphQL (API Mode) or mimics browser behavior (Browser) to fetch comprehensive data: pinned items, contribution graphs, top repositories, and starred projects.
 
 ### Agentic Reasoning ("The Refinery")
 - **Iterative Exploration (Full-Dive):** In its most powerful mode, Kognit spins up a swarm of sub-agents. A specialized "Repo Analyst" visits every key repository, deconstructing its README.md, tech stack, and complexity score in isolation before feeding insights back to the main synthesizer.
 - **Architectural Inference:** The AI infers *role* and *expertise* from project structure and dependencies. (e.g., "Uses Tokio + Actix" -> "Systems Engineer specializing in async runtimes").
-- **Hallucination Guardrails:** Kognit cross-checks extracted claims against raw data. Links are HTTP-verified for liveness.
+- **Hallucination Guardrails:** Kognit cross-checks extracted claims against raw data.
 
 ### Professional Rendering ("The Canvas")
 - **PDF Generation:** Outputs a stunning, print-ready PDF using `WeasyPrint`.
@@ -104,7 +104,7 @@ Kognit adapts its voice and depth to your needs. Check out these examples:
 ### Basic Profiling
 Generate a standard biography PDF for a user (e.g., `torvalds`).
 ```bash
-python3 entry.py torvalds --output torvalds_profile.pdf --scrape-external
+python3 entry.py torvalds --output torvalds_profile.pdf
 ```
 
 ### Modes of Operation
@@ -149,18 +149,18 @@ You can adjust the personality of the agent:
 
 Kognit is built on a modular, agentic architecture:
 
-1.  **Probes (`src/kognit/probes`):**
+1.  **Probes (`kognit/probes`):**
     *   **GithubProbe:** Handles GraphQL (API) or BeautifulSoup (Browser) extraction.
     *   **Normalizer:** Flattens complex nested JSON into a dense, searchable Markdown context.
     
-2.  **Refinery (`src/kognit/refinery`):**
+2.  **Refinery (`kognit/refinery`):**
     *   **Engine:** The PydanticAI-powered LLM loop.
     *   **Validator:** Post-processing logic to verify links and data integrity.
     
-3.  **Explorer (`src/kognit/agent/explorer.py`):**
+3.  **Explorer (`kognit/agent/explorer.py`):**
     *   A sub-agent specialized in code auditing. It runs independent cycles for each repository found during the Full-Dive.
 
-4.  **Renderer (`src/kognit/renderer`):**
+4.  **Renderer (`kognit/renderer`):**
     *   **Jinja2 Engine:** Hydrates the `biography.html` template.
     *   **Latex2SVG:** Renders math equations using Matplotlib for PDF compatibility.
     *   **WeasyPrint:** Converts the final HTML canvas into a paginated PDF.
@@ -169,14 +169,18 @@ Kognit is built on a modular, agentic architecture:
 
 ## Disclaimer & Ethics
 
-**This tool is intended for personal use, humor, and self-reflection.**
+**IMPORTANT: READ BEFORE USE**
 
-Kognit is designed to provide a "Roast" or a "Deep Dive" based on publicly available data. While it aims for technical accuracy, it is ultimately a generative AI system. It creates a narrative persona that may prioritize entertainment or narrative coherence over strict factual precision.
+Kognit is a tool built for **humor, self-reflection, and personal technical auditing**. It utilizes publicly available data from GitHub to generate creative personas and technical narratives. 
 
-**Please Note:**
-1.  **Not a Background Check:** This report should not be used as a primary source for hiring decisions, background checks, or professional evaluations without human verification.
-2.  **Subjectivity:** The "Roast" mode is explicitly designed to be critical and satirical. If the feedback stings, **that is the point**. It is meant to be funny and useful, but not taken as a personal attack.
-3.  **Liability:** I am not responsible for how you use the generated reports. Use this tool responsibly and ethically.
+### Ethical Responsibility
+By using this tool, you agree to the following:
+1.  **Anti-Stalking Policy:** This tool must **NOT** be used to harass, stalk, or gather information for malicious intent. It is strictly limited to public GitHub technical footprints.
+2.  **No Automated Screening:** This report should **NOT** be used as a primary or automated filter for hiring decisions or professional evaluations. AI-generated personas can be biased, inaccurate, or prioritize narrative over fact.
+3.  **Subjectivity Warning:** The "Roast" mode is designed to be critical and satirical. If the feedback stings, **that is the point**. It is intended for amusement and lighthearted self-critique.
+4.  **Liability:** I am not responsible for any misuse of the generated reports, or for any social or professional consequences arising from the use of this tool. You assume all responsibility for the ethical use of the data you process.
+
+Use this tool with respect for your peers and the open-source community.
 
 ---
 

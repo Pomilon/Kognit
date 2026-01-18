@@ -17,7 +17,7 @@ def test_normalizer_structure():
             }
         }
     }
-    context = normalize_profile_context(mock_github, {}, include_readmes=True)
+    context = normalize_profile_context(mock_github, include_readmes=True)
     assert "Test User" in context
     assert "## Identity" in context
 

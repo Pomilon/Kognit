@@ -10,7 +10,7 @@ load_dotenv()
 # --- Prompts ---
 
 BASE_PROMPT = """
-You are the Kognit Synthesis Engine. Your goal is to analyze the provided raw data from a developer's digital footprint.
+You are the Kognit Synthesis Engine. Your goal is to analyze the provided raw data from a developer's GitHub footprint.
 Voice: Professional, objective, and analytical.
 
 **CRITICAL INSTRUCTION:**
@@ -39,7 +39,7 @@ DEEP_DIVE_INSTRUCTIONS = """
 CONNECTIONS_INSTRUCTIONS = """
 **Mode: Ecosystem & Connections**
 1. **Analyze Reach:** Look at stars, forks, and followers to gauge community impact.
-2. **Network:** Identify organizations, key collaborators (inferred), and ecosystem position (e.g., "Core contributor to Rust ecosystem").
+2. **Network:** Identify organizations and ecosystem position (e.g., "Core contributor to Rust ecosystem").
 3. **Output:** MUST populate the `ecosystem_report` field with a detailed analysis of their place in the software world.
 """
 
@@ -113,5 +113,5 @@ def synthesize_identity(raw_github_payload: dict, model_name: Optional[str] = No
     """
     Legacy entry point.
     """
-    context = normalize_profile_context(raw_github_payload, {{}})
+    context = normalize_profile_context(raw_github_payload, include_readmes=True)
     return generate_identity_from_context(context, model_name)
