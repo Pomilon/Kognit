@@ -100,12 +100,42 @@ def generate_identity_from_context(
         system_prompt=full_system_prompt
     )
     
-    result = agent.run_sync(
-        f"Analyze the following developer footprint:\n\n{context_str}"
-    )
-    
-    # --- Integration: Validate and Refine ---
-    identity = refine_identity(result.output, context_str)
+    import time
+    max_retries = 3
+    retry_delay = 20 # Seconds
+
+    for attempt in range(max_retries):
+        try:
+            result = agent.run_sync(
+                f"Analyze the following developer footprint:\n\n{context_str}"
+            )
+            # --- Integration: Validate and Refine ---
+            identity = refine_identity(result.output, context_str)
+            break # Success!
+        except Exception as e:
+            error_str = str(e).lower()
+            # Check for Rate Limit (429) or Overloaded (503)
+            if ("429" in error_str or "rate_limit" in error_str or "too many requests" in error_str) and attempt < max_retries - 1:
+                wait_time = retry_delay * (attempt + 1)
+                print(f"  > [Synthesis] Rate limit reached. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}...")
+                time.sleep(wait_time)
+                continue
+            
+            # Check for failed_generation in the error body (Groq/PydanticAI specific)
+            error_body = getattr(e, 'body', {}) if hasattr(e, 'body') else {}
+            failed_gen = error_body.get('error', {}).get('failed_generation')
+            
+            if failed_gen:
+                print(f"  > [Synthesis] Tool use failed, attempting to recover content...")
+                # If we have a roast/humor, the model might have just output text.
+                # We create a placeholder identity with the text in the summary.
+                return DeveloperIdentity(
+                    name="[Recovered]",
+                    headline="Synthesis Error Fallback",
+                    summary=f"**Note: Structured synthesis failed. Raw model output follows:**\n\n{failed_gen}",
+                    role_inference="Unknown (Synthesis Failure)"
+                )
+            raise e
     
     return identity
 

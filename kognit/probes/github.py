@@ -47,6 +47,26 @@ query($login: String!) {
               text
             }
           }
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 4) {
+                  totalCount
+                  nodes {
+                    message
+                  }
+                }
+              }
+            }
+          }
+          tree: object(expression: "HEAD:") {
+            ... on Tree {
+              entries {
+                name
+                type
+              }
+            }
+          }
         }
         ... on Gist {
           name
@@ -84,6 +104,26 @@ query($login: String!) {
             text
           }
         }
+        defaultBranchRef {
+          target {
+            ... on Commit {
+              history(first: 4) {
+                totalCount
+                nodes {
+                  message
+                }
+              }
+            }
+          }
+        }
+        tree: object(expression: "HEAD:") {
+          ... on Tree {
+            entries {
+              name
+              type
+            }
+          }
+        }
       }
     }
     
@@ -99,6 +139,10 @@ query($login: String!) {
       contributionCalendar {
         totalContributions
       }
+      totalCommitContributions
+      totalPullRequestContributions
+      totalIssueContributions
+      totalRepositoryContributions
     }
   }
 }
@@ -202,10 +246,29 @@ class GithubProbe:
             # Contributions
             contrib_h2 = soup_main.find("h2", class_="f4 text-normal mb-2")
             total_contribs = 0
+            
+            if not contrib_h2:
+                # GitHub often loads contributions via include-fragment
+                fragment = soup_main.find("include-fragment", src=re.compile(r"tab=contributions"))
+                if fragment:
+                    fragment_url = f"https://github.com{fragment['src']}"
+                    try:
+                        resp_frag = await client.get(
+                            fragment_url, 
+                            headers={**self.headers, "X-Requested-With": "XMLHttpRequest"}
+                        )
+                        if resp_frag.status_code == 200:
+                            soup_frag = BeautifulSoup(resp_frag.text, "html.parser")
+                            # The h2 in the fragment might have slightly different classes
+                            contrib_h2 = soup_frag.find("h2", class_=re.compile(r"f4 text-normal"))
+                    except Exception as e:
+                        print(f"  > Warning: Failed to fetch contribution fragment: {e}")
+
             if contrib_h2:
                 match = re.search(r"([\d,]+)\s+contributions", contrib_h2.get_text())
                 if match:
                     total_contribs = int(match.group(1).replace(",", ""))
+            
             user_data["contributionsCollection"] = {"contributionCalendar": {"totalContributions": total_contribs}}
 
             # --- Pinned Items ---
@@ -214,6 +277,11 @@ class GithubProbe:
             pinned_fetch_tasks = []
 
             for item in pinned_list:
+                repo_link_el = item.select_one("a[data-hydro-click*='PINNED_REPO']")
+                if not repo_link_el:
+                    repo_link_el = item.select_one("a")
+                
+                repo_path = repo_link_el.get("href", "") if repo_link_el else ""
                 repo_name = item.select_one("span.repo").get_text(strip=True)
                 desc = self._get_text(item, "p", "pinned-item-desc") or ""
                 lang = self._get_text(item, "span", "itemprop='programmingLanguage'") or "Unknown"
@@ -221,21 +289,32 @@ class GithubProbe:
                 star_a = item.select_one("a[href$='/stargazers']")
                 stars = self._parse_count(star_a.get_text(strip=True)) if star_a else 0
                 
+                full_url = f"https://github.com{repo_path}"
                 node = {
                     "name": repo_name,
                     "description": desc,
-                    "url": f"https://github.com/{username}/{repo_name}",
+                    "url": full_url,
                     "stargazerCount": stars,
                     "primaryLanguage": {"name": lang},
                     "languages": {"nodes": [{"name": lang}]}
                 }
                 pinned_nodes.append(node)
-                pinned_fetch_tasks.append(self._fetch_raw_readme_async(client, username, repo_name))
+                # Fetch Structure & README concurrently
+                pinned_fetch_tasks.append(self._fetch_repo_details_async(client, full_url))
 
-            # Fetch Pinned READMEs
-            pinned_readmes = await asyncio.gather(*pinned_fetch_tasks)
-            for node, readme in zip(pinned_nodes, pinned_readmes):
-                node["readme"] = {"text": readme} if readme else None
+            # Fetch Pinned Details
+            pinned_details = await asyncio.gather(*pinned_fetch_tasks)
+            for node, details in zip(pinned_nodes, pinned_details):
+                node["readme"] = {"text": details["readme"]} if details["readme"] else None
+                node["tree"] = {"entries": details["tree"]}
+                node["defaultBranchRef"] = {
+                    "target": {
+                        "history": {
+                            "totalCount": details["commits"],
+                            "nodes": [{"message": m} for m in details["latest_commits"]]
+                        }
+                    }
+                }
             
             user_data["pinnedItems"] = {"nodes": pinned_nodes}
 
@@ -252,8 +331,8 @@ class GithubProbe:
                 soup_page = BeautifulSoup(resp.text, "html.parser")
                 all_repo_items.extend(soup_page.select("li[itemprop='owns']"))
 
-            repo_fetch_tasks = []
             repo_metadata = []
+            repo_fetch_tasks = []
 
             for item in all_repo_items:
                 name_tag = item.select_one("a[itemprop='name codeRepository']")
@@ -281,14 +360,23 @@ class GithubProbe:
                     "languages": {"nodes": [{"name": r_lang}]}
                 }
                 repo_metadata.append(meta)
-                repo_fetch_tasks.append(self._fetch_raw_readme_async(client, username, r_name))
+                repo_fetch_tasks.append(self._fetch_repo_details_async(client, r_url))
 
-            # Fetch ALL READMEs concurrently
-            print(f"  > Fetching READMEs for {len(repo_metadata)} repositories...")
-            all_readmes = await asyncio.gather(*repo_fetch_tasks)
+            # Fetch ALL Details concurrently
+            print(f"  > Fetching metadata and structure for {len(repo_metadata)} repositories...")
+            all_details = await asyncio.gather(*repo_fetch_tasks)
             
-            for meta, readme in zip(repo_metadata, all_readmes):
-                meta["readme"] = {"text": readme} if readme else None
+            for meta, details in zip(repo_metadata, all_details):
+                meta["readme"] = {"text": details["readme"]} if details["readme"] else None
+                meta["tree"] = {"entries": details["tree"]}
+                meta["defaultBranchRef"] = {
+                    "target": {
+                        "history": {
+                            "totalCount": details["commits"],
+                            "nodes": [{"message": m} for m in details["latest_commits"]]
+                        }
+                    }
+                }
                 repo_nodes.append(meta)
 
             user_data["repositories"] = {"nodes": repo_nodes}
@@ -312,17 +400,119 @@ class GithubProbe:
 
             return {"data": {"user": user_data}}
 
-    async def _fetch_raw_readme_async(self, client: httpx.AsyncClient, user: str, repo: str) -> Optional[str]:
-        branches = ["main", "master"]
-        for branch in branches:
-            url = f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/README.md"
-            try:
-                resp = await client.get(url)
-                if resp.status_code == 200:
-                    return resp.text
-            except:
-                continue
-        return None
+    async def _fetch_repo_details_async(self, client: httpx.AsyncClient, repo_url: str) -> Dict[str, Any]:
+        """
+        Fetches README, Root structure, latest commits, and total commits for a repo.
+        """
+        details = {"readme": None, "tree": [], "commits": 0, "latest_commits": []}
+        
+        try:
+            # 1. Fetch Main Page for structure and commit count
+            resp = await client.get(repo_url)
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, "html.parser")
+                
+                # --- Commit Count ---
+                commit_text = soup.find(lambda tag: tag.name == "span" and "commits" in tag.get_text().lower())
+                if commit_text:
+                    match = re.search(r"([\d,]+)", commit_text.get_text())
+                    if match:
+                        details["commits"] = self._parse_count(match.group(1))
+                
+                if details["commits"] == 0:
+                    commit_span = soup.select_one("span.d-none.d-sm-inline strong")
+                    if commit_span:
+                        details["commits"] = self._parse_count(commit_span.get_text(strip=True))
+
+                # --- Latest Commit Messages ---
+                try:
+                    commits_url = f"{repo_url}/commits"
+                    c_resp = await client.get(commits_url)
+                    if c_resp.status_code == 200:
+                        c_soup = BeautifulSoup(c_resp.text, "html.parser")
+                        msgs = []
+                        
+                        # Try JSON first (Modern GitHub)
+                        c_embedded = c_soup.find("script", {"data-target": "react-app.embeddedData"})
+                        if c_embedded:
+                            try:
+                                c_json = json.loads(c_embedded.get_text())
+                                payload = c_json.get("payload") or {}
+                                groups = payload.get("commitGroups") or []
+                                for group in groups:
+                                    if not group: continue
+                                    commits = group.get("commits") or []
+                                    for c in commits:
+                                        if not c: continue
+                                        msg = c.get("shortMessage")
+                                        if msg and msg not in msgs:
+                                            msgs.append(msg)
+                                        if len(msgs) >= 4: break
+                                    if len(msgs) >= 4: break
+                            except:
+                                pass
+                        
+                        # Fallback to selectors if JSON failed or was empty
+                        if not msgs:
+                            # 1. Modern: data-testid="commit-row-item-message" or similar inside rows
+                            # Often rows are <li> or <div>
+                            commit_rows = c_soup.select("div[data-testid='commit-row-item'], li.Box-row")
+                            for row in commit_rows:
+                                msg_link = row.select_one("h4 a, a.Link--primary, .commit-title a")
+                                if msg_link:
+                                    text = msg_link.get_text(strip=True)
+                                    if text and text not in msgs:
+                                        msgs.append(text)
+                                if len(msgs) >= 4: break
+                            
+                            # 2. Ultra-fallback: just find any Links that look like commits
+                            if not msgs:
+                                all_commit_links = c_soup.find_all("a", href=re.compile(r"/commit/[a-f0-9]{40}"))
+                                for link in all_commit_links:
+                                    text = link.get_text(strip=True)
+                                    # Filter out the SHA-only links
+                                    if text and len(text) > 8 and text not in msgs:
+                                        msgs.append(text)
+                                    if len(msgs) >= 4: break
+                        
+                        if msgs:
+                            details["latest_commits"] = msgs
+                except:
+                    pass
+
+                # --- Tree Structure ---
+                links = soup.select("a.Link--primary")
+                seen_names = set()
+                
+                # Extract repo path for child check
+                repo_path = "/" + "/".join(repo_url.split("/")[-2:]) # /user/repo
+                
+                for link in links:
+                    href = link.get("href", "")
+                    name = link.get_text(strip=True)
+                    
+                    if not name or name in seen_names:
+                        continue
+                    
+                    if f"{repo_path}/tree/" in href or f"{repo_path}/blob/" in href:
+                        parts = href.strip("/").split("/")
+                        if len(parts) >= 5:
+                            seen_names.add(name)
+                            e_type = "tree" if "/tree/" in href else "blob"
+                            details["tree"].append({"name": name, "type": e_type})
+
+            # 2. Fetch README (Raw)
+            raw_url = repo_url.replace("github.com", "raw.githubusercontent.com")
+            branches = ["main", "master"]
+            for branch in branches:
+                r_resp = await client.get(f"{raw_url}/{branch}/README.md")
+                if r_resp.status_code == 200:
+                    details["readme"] = r_resp.text
+                    break
+        except Exception as e:
+            print(f"  > Warning: Detail fetch failed for {repo_url}: {e}")
+            
+        return details
 
     def _get_text(self, soup, tag, selector_str):
         # Helper that handles class or prop attributes roughly

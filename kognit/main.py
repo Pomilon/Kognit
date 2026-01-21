@@ -85,11 +85,23 @@ def main():
     # 2. Normalize & Synthesize
     console.print("[bold yellow]Synthesizing Narrative...[/bold yellow]")
     
-    include_readmes = (args.mode != "full-dive")
-    
+    # Intelligently scale context density to stay under TPM limits
+    # Full Dive appends its own results, so we can afford smaller base context
+    if args.mode == "full-dive":
+        max_readme = 1500
+        max_repos = 10
+    elif args.mode == "deep-dive":
+        max_readme = 3000
+        max_repos = 15
+    else:
+        max_readme = 1000
+        max_repos = 5
+
     normalized_context = normalize_profile_context(
         raw_github_data, 
-        include_readmes=include_readmes
+        include_readmes=True,
+        max_readme_chars=max_readme,
+        max_repos=max_repos
     )
     
     # --- Full Dive: Agentic Exploration ---
@@ -98,7 +110,12 @@ def main():
             from kognit.agent.explorer import ExplorerAgent
             console.print("[bold magenta]Initiating Full-Dive Exploration...[/bold magenta]")
             
-            explorer = ExplorerAgent(model_name=args.model, humor=args.humor, is_roast=args.roast)
+            explorer = ExplorerAgent(
+                model_name=args.model, 
+                humor=args.humor, 
+                is_roast=args.roast,
+                custom_instructions=args.instruction
+            )
             
             import asyncio
             dive_results = asyncio.run(explorer.full_dive(raw_github_data.get("data", {}).get("user", {})))

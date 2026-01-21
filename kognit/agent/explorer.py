@@ -17,7 +17,7 @@ Fill the fields:
 """
 
 class ExplorerAgent:
-    def __init__(self, model_name: str = 'google-gla:gemini-flash-latest', humor: int = 0, is_roast: bool = False):
+    def __init__(self, model_name: str = 'google-gla:gemini-flash-latest', humor: int = 0, is_roast: bool = False, custom_instructions: str = None):
         self.model_name = model_name
         
         # Dynamic Prompt Construction
@@ -38,6 +38,9 @@ class ExplorerAgent:
             Level 100 means full-blown stand-up comedy style.
             Current Level: {humor}. Adjust your sarcasm accordingly.
             """
+        
+        if custom_instructions:
+            prompt += f"\n\n**ADDITIONAL USER INSTRUCTIONS:**\n{custom_instructions}"
             
         self.analyst_agent = Agent(
             model_name,
@@ -53,12 +56,32 @@ class ExplorerAgent:
         if repo_data.get("readme"):
             readme_text = repo_data["readme"].get("text", "")[:8000] # Generous limit for single repo
 
+        # None-safe data extraction
+        langs_nodes = (repo_data.get('languages') or {}).get('nodes') or []
+        langs_str = ', '.join([n['name'] for n in langs_nodes if n and 'name' in n])
+        
+        history = repo_data.get('defaultBranchRef') or {}
+        if history:
+            history = history.get('target') or {}
+        if history:
+            history = history.get('history') or {}
+        
+        commit_nodes = history.get('nodes') or []
+        latest_commits_text = "\n".join([f"- {n.get('message', 'N/A')}" for n in commit_nodes if n])
+        
         context = f"""
         Repository: {repo_data.get('name')}
         Description: {repo_data.get('description')}
-        Languages: {', '.join([n['name'] for n in repo_data.get('languages', {}).get('nodes', [])])}
+        Languages: {langs_str}
         Stars: {repo_data.get('stargazerCount')}
+        Total Commits: {history.get('totalCount', 0)}
         
+        Latest Commits:
+        {latest_commits_text}
+
+        Repository Structure (Root):
+        {', '.join([f"{e['name']}{'/' if e['type'] == 'tree' else ''}" for e in (repo_data.get('tree') or {}).get('entries') or [] if e])}
+
         README Content:
         {readme_text}
         """
@@ -124,7 +147,7 @@ class ExplorerAgent:
         # Parallel is faster but hits rate limits instantly. 
         # Let's do chunks of 3.
         
-        chunk_size = 3
+        chunk_size = 2 # Reduced chunk size for token safety
         for i in range(0, len(target_repos), chunk_size):
             chunk = target_repos[i:i+chunk_size]
             tasks = [self.analyze_repository(repo) for repo in chunk]
@@ -132,6 +155,10 @@ class ExplorerAgent:
             analyses.extend(results)
             print(f"  [Explorer] Analyzed {len(analyses)}/{len(target_repos)}...")
             
+            # Add a small delay between chunks to allow TPM to recover
+            if i + chunk_size < len(target_repos):
+                await asyncio.sleep(10) 
+
         return self._compile_report(analyses)
 
     def _compile_report(self, analyses: List[RepoAnalysis]) -> Dict[str, Any]:
